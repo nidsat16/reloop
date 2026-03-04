@@ -1,52 +1,49 @@
-﻿import React, { useEffect, useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+﻿import React, { useState } from "react";
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
 import { supabase } from "../src/supabase";
 
+const COMPANIES = [
+  { id: "c1", name: "FizzCo", tagline: "Refreshing responsibly" },
+  { id: "c2", name: "PureLine", tagline: "Clean products, cleaner planet" },
+  { id: "c3", name: "NourishCo", tagline: "Good for you, good for earth" },
+];
+
 export default function OnboardScreen({ navigation }) {
-  const [companies, setCompanies] = useState([]);
-  const [errorMsg, setErrorMsg] = useState("");
+  const [selected, setSelected] = useState(null);
 
-  useEffect(() => {
-    loadCompanies();
-  }, []);
-
-  async function loadCompanies() {
-    setErrorMsg("");
-    const { data, error } = await supabase.from("companies").select("*");
-
-    if (error) {
-      setErrorMsg(error.message);
-      return;
-    }
-    setCompanies(data ?? []);
-  }
+  const handleSelect = async (company) => {
+    setSelected(company.id);
+    const { data: { user } } = await supabase.auth.getUser();
+    await supabase.from("users").upsert({
+      id: user.id,
+      email: user.email,
+      linkedCompanyId: company.id,
+      creditBalance: 0,
+    });
+    navigation.navigate("Home");
+  };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Choose Recycling Partner</Text>
-
-      {!!errorMsg && <Text style={styles.err}>{errorMsg}</Text>}
-
-      {companies.map((c) => (
+    <ScrollView style={styles.container}>
+      <Text style={styles.title}>Choose Your Recycling Partner</Text>
+      {COMPANIES.map((c) => (
         <TouchableOpacity
-          key={String(c.id)}
-          style={styles.card}
-          onPress={() => navigation.navigate("Schedule", { company: c })}
-        >
-          <Text style={styles.name}>{c.name}</Text>
-          <Text>{c.tagline}</Text>
-          <Text>Recycles: {c.wastetype}</Text>
-          <Text>Offer: {c.creditoffer}</Text>
+          key={c.id}
+          style={[styles.card, selected === c.id && styles.selectedCard]}
+          onPress={() => handleSelect(c)}>
+          <Text style={styles.cardTitle}>{c.name}</Text>
+          <Text style={styles.cardSub}>{c.tagline}</Text>
         </TouchableOpacity>
       ))}
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: "#f5f5f5" },
-  title: { fontSize: 24, fontWeight: "bold", marginBottom: 16 },
-  card: { backgroundColor: "#fff", padding: 14, borderRadius: 10, marginBottom: 12 },
-  name: { fontSize: 18, fontWeight: "bold" },
-  err: { color: "red", marginBottom: 10 },
+  container: { flex: 1, padding: 24, backgroundColor: "#fff" },
+  title: { fontSize: 22, fontWeight: "700", color: "#2D6A4F", marginTop: 48, marginBottom: 24 },
+  card: { padding: 16, borderWidth: 1, borderColor: "#ccc", borderRadius: 10, marginBottom: 12 },
+  selectedCard: { borderColor: "#2D6A4F", backgroundColor: "#D8F3DC" },
+  cardTitle: { fontSize: 16, fontWeight: "700" },
+  cardSub: { fontSize: 13, color: "#666", marginTop: 4 },
 });
