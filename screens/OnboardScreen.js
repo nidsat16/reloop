@@ -13,13 +13,19 @@ export default function OnboardScreen({ navigation }) {
 
   const handleSelect = async (company) => {
     setSelected(company.id);
-    const { data: { user } } = await supabase.auth.getUser();
-    await supabase.from("users").upsert({
-      id: user.id,
-      email: user.email,
-      linkedCompanyId: company.id,
-      creditBalance: 0,
-    });
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        await supabase.from("users").upsert({
+          id: user.id,
+          email: user.email,
+          linkedCompanyId: company.id,
+          creditBalance: 0,
+        });
+      }
+    } catch (e) {
+      console.log("User save error:", e.message);
+    }
     navigation.navigate("Home");
   };
 
