@@ -2,6 +2,9 @@
 import { View, Text, TouchableOpacity, FlatList, StyleSheet } from 'react-native';
 import { supabase } from '../src/supabase';
 
+// Credits earned per bag size
+const CREDITS_MAP = { small: 10, medium: 25, large: 50 };
+
 export default function HomeScreen({ navigation }) {
   const [credits, setCredits] = useState(0);
   const [pickups, setPickups] = useState([]);
@@ -26,7 +29,37 @@ export default function HomeScreen({ navigation }) {
       .from('pickups')
       .select('*')
       .eq('userId', user.id);
-    if (pickupData) setPickups(pickupData);
+    if (pickupData) {
+      setPickups(pickupData);
+      // Add credits for any completed pickups not yet credited
+      await processCompletedPickups(pickupData, user.id);
+    }
+  };
+
+  const processCompletedPickups = async (pickupList, userId) => {
+    // Find completed pickups that haven't been credited yet
+    const uncredited = pickupList.filter(
+      p => p.status === 'completed' && p.creditsEarned === 0
+    );
+
+    for (const pickup of uncredited) {
+      const earnedCredits = CREDITS_MAP[pickup.quantity] || 0;
+
+      // Mark pickup as credited
+      await supabase
+        .from('pickups')
+        .update({ creditsEarned: earnedCredits })
+        .eq('id', pickup.id);
+
+      // Add credits to user balance
+      await supabase
+        .from('users')
+        .update({ creditBalance: credits + earnedCredits })
+        .eq('id', userId);
+
+      // Update display
+      setCredits(prev => prev + earnedCredits);
+    }
   };
 
   return (
@@ -46,6 +79,9 @@ export default function HomeScreen({ navigation }) {
           <View style={styles.pickupItem}>
             <Text>{item.wasteType} — {item.quantity}</Text>
             <Text style={styles.status}>{item.status}</Text>
+            {item.creditsEarned > 0 &&
+              <Text style={styles.credits}>+{item.creditsEarned} pts</Text>
+            }
           </View>
         )} />
     </View>
@@ -64,4 +100,5 @@ const styles = StyleSheet.create({
   pickupItem: { flexDirection: 'row', justifyContent: 'space-between', padding: 12,
     borderWidth: 1, borderColor: '#eee', borderRadius: 8, marginBottom: 8 },
   status: { color: '#40916C', fontWeight: '600' },
+  credits: { color: '#2D6A4F', fontWeight: 'bold' },
 });
