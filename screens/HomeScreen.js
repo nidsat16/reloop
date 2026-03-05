@@ -46,8 +46,8 @@ export default function HomeScreen({ navigation }) {
         <Text style={styles.creditLabel}>Your Credits</Text>
         <Text style={styles.creditAmount}>{credits} pts</Text>
       </View>
-      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("CompanyScreen")}>
-        <Text style={styles.buttonText}>+ CompanyScreen</Text>
+      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Schedule')}>
+        <Text style={styles.buttonText}>+ Schedule Pickup</Text>
       </TouchableOpacity>
       <Text style={styles.sectionTitle}>Pickup History</Text>
       <FlatList data={pickups} keyExtractor={i => i.id} scrollEnabled={false}
