@@ -1,4 +1,5 @@
-﻿import React from 'react';
+import React from 'react';
+import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import LoginScreen from './screens/LoginScreen';
 import OnboardScreen from './screens/OnboardScreen';
@@ -11,13 +12,15 @@ const Stack = createNativeStackNavigator();
 
 export default function AppNavigator() {
   return (
-    <Stack.Navigator initialRouteName='Onboard'>
-      <Stack.Screen name='Login' component={LoginScreen} options={{ headerShown: false }} />
-      <Stack.Screen name='Onboard' component={OnboardScreen} options={{ title: 'Pick Your Company' }} />
-      <Stack.Screen name='Home' component={HomeScreen} options={{ title: 'Home', headerLeft: () => null }} />
-      <Stack.Screen name='Schedule' component={ScheduleScreen} options={{ title: 'Schedule Pickup' }} />
-      <Stack.Screen name='Credits' component={CreditsScreen} options={{ title: 'My Credits' }} />
-      <Stack.Screen name='Company' component={CompanyScreen} options={{ title: 'Company Dashboard' }} />
-    </Stack.Navigator>
+    <NavigationContainer>
+      <Stack.Navigator initialRouteName='Login'>
+        <Stack.Screen name='Login' component={LoginScreen} options={{ headerShown: false }} />
+        <Stack.Screen name='Onboard' component={OnboardScreen} options={{ title: 'Pick Your Company' }} />
+        <Stack.Screen name='Home' component={HomeScreen} options={{ title: 'Home', headerLeft: () => null }} />
+        <Stack.Screen name='Schedule' component={ScheduleScreen} options={{ title: 'Schedule Pickup' }} />
+        <Stack.Screen name='Credits' component={CreditsScreen} options={{ title: 'My Credits' }} />
+        <Stack.Screen name='Company' component={CompanyScreen} options={{ title: 'Company Dashboard' }} />
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 }
