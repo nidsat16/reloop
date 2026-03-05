@@ -1,5 +1,5 @@
 ﻿import React, { useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, TextInput, ScrollView } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, TextInput, ScrollView, Alert } from "react-native";
 import { supabase } from "../src/supabase";
 
 const wasteOptions = ["Plastic bottles", "Food wrappers", "HDPE containers", "Metal cans", "Paper"];
@@ -16,18 +16,24 @@ export default function ScheduleScreen({ route, navigation }) {
   const savePickup = async () => {
     setMsg("");
     if (loading) return;
-    if (!company?.id) { setMsg("No company selected"); return; }
     setLoading(true);
     try {
-      const { error } = await supabase.from("pickups").insert([{
-        company_id: company.id,
-        item: wasteType + " (" + bagSize + ")",
+      const { data, error } = await supabase.from("pickups").insert([{
+        wasteType: wasteType,
+        quantity: bagSize,
         location: location,
         status: "pending",
+        creditsEarned: 0,
       }]);
-      if (error) { setMsg(error.message); return; }
+      if (error) {
+        Alert.alert("Error", error.message);
+        setMsg(error.message);
+        return;
+      }
+      Alert.alert("Success", "Pickup scheduled!");
       navigation.navigate("Home");
     } catch (e) {
+      Alert.alert("Error", e.message);
       setMsg(e.message);
     } finally {
       setLoading(false);
