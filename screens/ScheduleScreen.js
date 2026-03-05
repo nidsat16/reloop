@@ -1,5 +1,5 @@
 ﻿import React, { useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, TextInput } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, TextInput, ScrollView } from "react-native";
 import { supabase } from "../src/supabase";
 
 const wasteOptions = ["Plastic bottles", "Food wrappers", "HDPE containers", "Metal cans", "Paper"];
@@ -17,7 +17,6 @@ export default function ScheduleScreen({ route, navigation }) {
     setMsg("");
     if (loading) return;
     if (!company?.id) { setMsg("No company selected"); return; }
-
     setLoading(true);
     try {
       const { error } = await supabase.from("pickups").insert([{
@@ -27,7 +26,7 @@ export default function ScheduleScreen({ route, navigation }) {
         status: "pending",
       }]);
       if (error) { setMsg(error.message); return; }
-      navigation.navigate("Company", { companyId: company.id, companyName: company.name });
+      navigation.navigate("Home");
     } catch (e) {
       setMsg(e.message);
     } finally {
@@ -36,7 +35,7 @@ export default function ScheduleScreen({ route, navigation }) {
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       <Text style={styles.title}>Schedule Pickup</Text>
       <Text style={styles.subtitle}>Company: {company?.name ?? "-"}</Text>
       <Text style={styles.section}>Waste type</Text>
@@ -54,19 +53,19 @@ export default function ScheduleScreen({ route, navigation }) {
       <Text style={styles.section}>Location</Text>
       <TextInput value={location} onChangeText={setLocation} style={styles.input} placeholder="Enter location" />
       <TouchableOpacity style={[styles.btn, loading && { opacity: 0.5 }]} onPress={savePickup} disabled={loading}>
-        <Text style={{ fontWeight: "700" }}>{loading ? "Saving..." : "Save Pickup"}</Text>
+        <Text style={{ fontWeight: "700", color: "#fff" }}>{loading ? "Saving..." : "Save Pickup"}</Text>
       </TouchableOpacity>
       {!!msg && <Text style={{ marginTop: 10, color: "red" }}>{msg}</Text>}
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 16, backgroundColor: "#fff" },
-  title: { fontSize: 22, fontWeight: "700" },
+  title: { fontSize: 22, fontWeight: "700", color: "#2D6A4F", marginTop: 48 },
   subtitle: { marginTop: 6, marginBottom: 10, color: "#444" },
   section: { marginTop: 14, fontWeight: "700" },
   row: { paddingVertical: 10 },
   input: { borderWidth: 1, borderColor: "#ddd", borderRadius: 8, padding: 10, marginTop: 8 },
-  btn: { marginTop: 18, padding: 14, borderRadius: 10, borderWidth: 1, alignItems: "center" },
+  btn: { marginTop: 18, padding: 14, borderRadius: 10, backgroundColor: "#2D6A4F", alignItems: "center", marginBottom: 40 },
 });
