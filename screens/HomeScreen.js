@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, FlatList, StyleSheet, ScrollView } from 'react-native';
 import { supabase } from '../src/supabase';
 
@@ -41,19 +41,19 @@ export default function HomeScreen({ navigation }) {
 
   return (
     <ScrollView style={styles.container}>
-      <Text style={styles.title}>♻ My Dashboard</Text>
+      <Text style={styles.title}>? My Dashboard</Text>
       <View style={styles.creditBox}>
         <Text style={styles.creditLabel}>Your Credits</Text>
         <Text style={styles.creditAmount}>{credits} pts</Text>
       </View>
-      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Schedule')}>
+      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Schedule', { company: { id: 'c1', name: 'FizzCo' } })}>
         <Text style={styles.buttonText}>+ Schedule Pickup</Text>
       </TouchableOpacity>
       <Text style={styles.sectionTitle}>Pickup History</Text>
       <FlatList data={pickups} keyExtractor={i => i.id} scrollEnabled={false}
         renderItem={({ item }) => (
           <View style={styles.pickupItem}>
-            <Text>{item.wasteType} — {item.quantity}</Text>
+            <Text>{item.wasteType} � {item.quantity}</Text>
             <Text style={styles.status}>{item.status}</Text>
             {item.creditsEarned > 0 && <Text style={styles.credits}>+{item.creditsEarned} pts</Text>}
           </View>
