@@ -1,5 +1,5 @@
 ﻿import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, FlatList, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, FlatList, StyleSheet, ScrollView } from 'react-native';
 import { supabase } from '../src/supabase';
 
 const CREDITS_MAP = { small: 10, medium: 25, large: 50 };
@@ -15,18 +15,9 @@ export default function HomeScreen({ navigation }) {
   const loadData = async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
-
-    const { data: userData } = await supabase
-      .from('users')
-      .select('creditBalance')
-      .eq('id', user.id)
-      .single();
+    const { data: userData } = await supabase.from('users').select('creditBalance').eq('id', user.id).single();
     if (userData) setCredits(userData.creditBalance);
-
-    const { data: pickupData } = await supabase
-      .from('pickups')
-      .select('*')
-      .eq('userId', user.id);
+    const { data: pickupData } = await supabase.from('pickups').select('*').eq('userId', user.id);
     if (pickupData) {
       setPickups(pickupData);
       await processCompletedPickups(pickupData, user.id);
@@ -34,9 +25,7 @@ export default function HomeScreen({ navigation }) {
   };
 
   const processCompletedPickups = async (pickupList, userId) => {
-    const uncredited = pickupList.filter(
-      p => p.status === 'completed' && p.creditsEarned === 0
-    );
+    const uncredited = pickupList.filter(p => p.status === 'completed' && p.creditsEarned === 0);
     for (const pickup of uncredited) {
       const earnedCredits = CREDITS_MAP[pickup.quantity] || 0;
       await supabase.from('pickups').update({ creditsEarned: earnedCredits }).eq('id', pickup.id);
@@ -51,7 +40,7 @@ export default function HomeScreen({ navigation }) {
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       <Text style={styles.title}>♻ My Dashboard</Text>
       <View style={styles.creditBox}>
         <Text style={styles.creditLabel}>Your Credits</Text>
@@ -61,7 +50,7 @@ export default function HomeScreen({ navigation }) {
         <Text style={styles.buttonText}>+ Schedule Pickup</Text>
       </TouchableOpacity>
       <Text style={styles.sectionTitle}>Pickup History</Text>
-      <FlatList data={pickups} keyExtractor={i => i.id}
+      <FlatList data={pickups} keyExtractor={i => i.id} scrollEnabled={false}
         renderItem={({ item }) => (
           <View style={styles.pickupItem}>
             <Text>{item.wasteType} — {item.quantity}</Text>
@@ -72,7 +61,7 @@ export default function HomeScreen({ navigation }) {
       <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
         <Text style={styles.logoutText}>Log Out</Text>
       </TouchableOpacity>
-    </View>
+    </ScrollView>
   );
 }
 
@@ -88,6 +77,6 @@ const styles = StyleSheet.create({
   pickupItem: { flexDirection: 'row', justifyContent: 'space-between', padding: 12, borderWidth: 1, borderColor: '#eee', borderRadius: 8, marginBottom: 8 },
   status: { color: '#40916C', fontWeight: '600' },
   credits: { color: '#2D6A4F', fontWeight: 'bold' },
-  logoutButton: { marginTop: 20, padding: 14, borderRadius: 8, borderWidth: 1, borderColor: '#ccc', alignItems: 'center' },
+  logoutButton: { marginTop: 20, marginBottom: 40, padding: 14, borderRadius: 8, borderWidth: 1, borderColor: '#ccc', alignItems: 'center' },
   logoutText: { color: '#999', fontWeight: '600' },
 });
