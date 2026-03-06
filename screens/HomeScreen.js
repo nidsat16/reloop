@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, FlatList, StyleSheet, ScrollView } from 'react-native';
+import { FlatList, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { supabase } from '../src/supabase';
 
 const CREDITS_MAP = { small: 10, medium: 25, large: 50 };
@@ -41,7 +41,7 @@ export default function HomeScreen({ navigation }) {
 
   return (
     <ScrollView style={styles.container}>
-      <Text style={styles.title}>? My Dashboard</Text>
+      <Text style={styles.title}> My Dashboard</Text>
       <View style={styles.creditBox}>
         <Text style={styles.creditLabel}>Your Credits</Text>
         <Text style={styles.creditAmount}>{credits} pts</Text>
@@ -53,8 +53,8 @@ export default function HomeScreen({ navigation }) {
       <FlatList data={pickups} keyExtractor={i => i.id} scrollEnabled={false}
         renderItem={({ item }) => (
           <View style={styles.pickupItem}>
-            <Text>{item.wasteType} — {item.quantity}</Text>
-            <Text style={styles.status}>{item.status}</Text>
+            <Text>{item.wasteType || item.waste_type || "New Pickup"} â™¦ {item.quantity || "1"}</Text>
+            <Text style={styles.status}>{item.status || 'pending'}</Text>
             {item.creditsEarned > 0 && <Text style={styles.credits}>+{item.creditsEarned} pts</Text>}
           </View>
         )} />
