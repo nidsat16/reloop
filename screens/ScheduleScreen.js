@@ -18,12 +18,14 @@ export default function ScheduleScreen({ route, navigation }) {
     if (loading) return;
     setLoading(true);
     try {
-      const { data, error } = await supabase.from("pickups").insert([{
+      const { data: { user } } = await supabase.auth.getUser();
+      const { error } = await supabase.from("pickups").insert([{
         wasteType: wasteType,
         quantity: bagSize,
         location: location,
         status: "pending",
         creditsEarned: 0,
+        userId: user?.id,
       }]);
       if (error) {
         Alert.alert("Error", error.message);
